@@ -9,96 +9,61 @@ const artistName = document.querySelector(".music-player p");
 
 const songs = [
   {
-    title: "ur eyes",
-    name: "synmade",
-    source:
-      "https://github.com/synmade/syn/raw/refs/heads/main/ur%20eyes%20(master%203).mp3",
-  }
+    title: "Ur Eyes",
+    name: "Synmade",
+    source: "https://github.com/synmade/syn/raw/refs/heads/main/ur%20eyes%20(master%203).mp3",
+  },
 ];
 
-let currentSongIndex = 3;
+let currentSongIndex = 0; // ✅ only one song
 
 function updateSongInfo() {
   songName.textContent = songs[currentSongIndex].title;
   artistName.textContent = songs[currentSongIndex].name;
   song.src = songs[currentSongIndex].source;
-
-  song.addEventListener("loadeddata", function () {});
 }
 
-song.addEventListener("timeupdate", function () {
-  if (!song.paused) {
-    progress.value = song.currentTime;
-  }
+song.addEventListener("timeupdate", () => {
+  if (!song.paused) progress.value = song.currentTime;
 });
 
-song.addEventListener("loadedmetadata", function () {
+song.addEventListener("loadedmetadata", () => {
   progress.max = song.duration;
   progress.value = song.currentTime;
 });
 
 function pauseSong() {
   song.pause();
-  controlIcon.classList.remove("fa-pause");
-  controlIcon.classList.add("fa-play");
+  controlIcon.classList.replace("fa-pause", "fa-play");
 }
 
 function playSong() {
   song.play();
-  controlIcon.classList.add("fa-pause");
-  controlIcon.classList.remove("fa-play");
+  controlIcon.classList.replace("fa-play", "fa-pause");
 }
 
 function playPause() {
-  if (song.paused) {
-    playSong();
-  } else {
-    pauseSong();
-  }
+  song.paused ? playSong() : pauseSong();
 }
 
 playPauseButton.addEventListener("click", playPause);
+progress.addEventListener("input", () => (song.currentTime = progress.value));
+progress.addEventListener("change", playSong);
 
-progress.addEventListener("input", function () {
-  song.currentTime = progress.value;
+forwardButton.addEventListener("click", () => {
+  if (songs.length > 1) {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    updateSongInfo();
+    playSong();
+  }
 });
 
-progress.addEventListener("change", function () {
-  playSong();
-});
-
-forwardButton.addEventListener("click", function () {
-  currentSongIndex = (currentSongIndex + 1) % songs.length;
-  updateSongInfo();
-  playPause();
-});
-
-backwardButton.addEventListener("click", function () {
-  currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-  updateSongInfo();
-  playPause();
+backwardButton.addEventListener("click", () => {
+  if (songs.length > 1) {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    updateSongInfo();
+    playSong();
+  }
 });
 
 updateSongInfo();
-
-var swiper = new Swiper(".swiper", {
-  effect: "coverflow",
-  centeredSlides: true,
-  initialSlide: 3,
-  slidesPerView: "auto",
-  allowTouchMove: false,
-  spaceBetween: 40,
-  coverflowEffect: {
-    rotate: 25,
-    stretch: 0,
-    depth: 50,
-    modifier: 1,
-    slideShadows: false,
-  },
-  navigation: {
-    nextEl: ".forward",
-    prevEl: ".backward",
-  },
-});
-
-// Inspiration: https://dribbble.com/shots/5455156-Car-HMI-assistant-Album-switching
